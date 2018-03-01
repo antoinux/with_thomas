@@ -157,13 +157,51 @@ def strat_early_not_stupid():
         if next_car.can_take_ride(rides[ra[i]]) > 0:
             next_car.add_ride(rides[ra[i]])
         for c in temp_cars:
-            heapq.heappush(cars_sorted, c)        
+            heapq.heappush(cars_sorted, c)
+
+def strat_early_not_stupid_nazi():
+    global ORDER
+    ORDER = 's'
+    ra = np.argsort(rides)
+    global cars, cars_sorted
+    cars = [Car(i) for i in range(F)]
+    cars_sorted = [cars[i] for i in range(F)]
+    for i in range(N):
+        next_car = heapq.heappop(cars_sorted)
+        temp_cars = [next_car]
+        while next_car.can_take_ride(rides[ra[i]]) != 2:
+            if len(cars_sorted) == 0:
+                break
+            next_car = heapq.heappop(cars_sorted)
+            temp_cars.append(next_car)
+
+        if next_car.can_take_ride(rides[ra[i]]) == 2:
+            next_car.add_ride(rides[ra[i]])
+        else:
+            for c in temp_cars:
+                heapq.heappush(cars_sorted, c)
+            next_car = heapq.heappop(cars_sorted)
+            temp_cars = [next_car]
+            while next_car.can_take_ride(rides[ra[i]]) == 0:
+                if len(cars_sorted) == 0:
+                    break
+                next_car = heapq.heappop(cars_sorted)
+                temp_cars.append(next_car)
+
+            if next_car.can_take_ride(rides[ra[i]]) > 0:
+                next_car.add_ride(rides[ra[i]])
+   
+
+        for c in temp_cars:
+            heapq.heappush(cars_sorted, c)
+
+
 
 def exe(input_file):
     clean()
     input(input_file)
-    strat_early_not_stupid()
-    out = 'data/early_not_stupid/'
+    strat_early_not_stupid_nazi()
+    out = 'data/early_not_stupid_nazi/'
     utils.ensure_dir(out)
     save_cars(out+input_file+'_out')
 
