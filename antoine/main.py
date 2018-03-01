@@ -13,7 +13,7 @@ R, C, F, N, B, T = 0, 0, 0, 0, 0, 0
 rides = []
 cars = []
 cars_sorted = []
-ORDER = 's'
+i_car = 0
 
 
 
@@ -27,18 +27,21 @@ class Ride():
         self.s = p[4]
         self.t = p[5]
         self.id = i
+        self.done = False
     
     def __equal__(self, other):
-        if ORDER == 's':
-            return self.s == other.s
-        else:
-            return self.t == other.t
+        self.id == other.id
 
     def __lt__(self, other):
-        if ORDER == 's':
-            return self.s < other.s
+        if self.done:
+            return False
+        car = cars[i_car]
+        d, d1 = car.dist(self), car.dist(other)
+        s1, s11 = car.can_take_ride(self), car.can_take_ride(other)
+        if s1 != s11:
+            return s1 > s11
         else:
-            return self.t < other.t
+            return max(d, self.s) < max(d1, other.s)
 
 @total_ordering
 class Car():
@@ -48,6 +51,7 @@ class Car():
         self.trips = []
         self.points = 0
         self.id = i
+
 
     def dist(self, r):
         return abs(self.p[0] - r.a) + abs(self.p[1] -r.b)
@@ -196,14 +200,35 @@ def strat_early_not_stupid_nazi():
             heapq.heappush(cars_sorted, c)
 
 
+def strat_from_cars():
+    global cars, cars_sorted
+    cars = [Car(i) for i in range(F)]
+    cars_sorted = [cars[i] for i in range(F)]
+    print(N)
+    for i in range(N):
+        if i%100 == 0:
+            print(i)
+        global i_car
+        if len(cars_sorted) == 0:
+            break
+        next_car = heapq.heappop(cars_sorted)
+        i_car = next_car.id
+        r = rides[0]
+        for j in range(1, N):
+            r = min(r, rides[j])
+        if next_car.can_take_ride(r) != 0 and not r.done:
+            next_car.add_ride(r)
+            r.done = True
+            heapq.heappush(cars_sorted, next_car)
 
 def exe(input_file):
     clean()
     input(input_file)
-    strat_early_not_stupid_nazi()
-    out = 'data/early_not_stupid_nazi/'
+    strat_from_cars()
+    out = 'data/from_cars/'
     utils.ensure_dir(out)
     save_cars(out+input_file+'_out')
+    print('done')
 
 if __name__ == "__main__":
     exe(FILE_1)
